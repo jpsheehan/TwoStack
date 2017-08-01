@@ -21,12 +21,14 @@ $ - swaps stacks
 0-9 - integer literal
 "*" - string literal
 
-# - comments
+# - comments until newline
 
 { - starts a function block until } is encountered then pushes the block to the stack
 
 | - begins a alphanumeric alias, pops the top element off the stack and stores it as the alias of the name
 @ - recall an alias value
+
+. - if the topmost value is +ve, print the character value, else, pop the value and jump
 
 
 """
@@ -176,13 +178,13 @@ class UlangInterpreter(object):
       else:
         offset += 1
 
-    self.stack.append(p[1:offset])
+    self.stack.append((-1) * self.index - 1)
 
     return offset
   
   def op_blockend(self, p):
     ''''''
-    pass
+    self.index = self.callstack.pop()
   
   def op_aliasrecall(self, p):
     ''''''
@@ -285,7 +287,14 @@ class UlangInterpreter(object):
 
   def op_print(self, p):
     ''''''
-    print(chr(self.stack[-1]), end='')
+    item = self.stack[-1]
+    
+    if item >= 0:
+      print(chr(item), end='')
+    else:
+      self.callstack.append(self.index)
+      
+      self.index = abs(self.stack.pop()) - 1
 
   def op_discard(self, p):
     '''Pop the topmost item of the stack.'''
@@ -360,6 +369,7 @@ class UlangInterpreter(object):
     self.stack = []
     self.ztack = []
     self.store = {}
+    self.callstack = []
   
   def debug(self):
     valid = ['c', 's', 'z']
