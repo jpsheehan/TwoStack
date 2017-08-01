@@ -30,6 +30,25 @@ class UcLang(object):
     self.ztack = []
     self.store = {}
   
+  def debug(self):
+    print('Debug Mode:')
+    valid = ['c', 's', 'z']
+    prompt = '((c)ontinue, (s)tack, (z)tack) > '
+    while True:
+      c = input(prompt)
+      if c == 'c':
+        return
+      elif c == 's':
+        print('Stack: ')
+        for i in range(len(self.stack)):
+          print('  {}: {}'.format(i, self.stack[i]))
+      elif c == 'z':
+        print('Ztack: ')
+        for i in range(len(self.ztack)):
+          print('  {}: {}'.format(i, self.ztack[i]))
+      else:
+        print('unknown command')
+  
   def error(self, message):
     source_start = max(0, self.index - 10)
     source_start = max(self.program.rfind('\n', source_start, self.index) + 1, source_start)
@@ -195,30 +214,13 @@ class UcLang(object):
           self.error('not enough items on stack')
           break
       elif p[0] == '_':
-        print('Debug Information:')
-        print('Stack: ')
-        for i in range(len(self.stack)):
-          print('  {}: {}'.format(i, self.stack[i]))
-        valid = ['c', 'q']
-        prompt = '(c, q) > '
-        c = input(prompt)
-        while c not in valid:
-          c = input(prompt)
-        if c == 'c':
-          pass
-        elif c == 'q':
-          break
-        else:
-          self.error('unknown command')
+        self.debug()
       else:
         self.error('unknown symbol \'{}\''.format(p[0]))
         break
 
       self.char_number += 1 + extra_advance
       self.index += 1 + extra_advance
-
-    for i in range(len(self.stack)):
-      print('{}: {}'.format(i, self.stack[i]))
 
 with open('program.u') as file:
   l = UcLang()
