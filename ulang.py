@@ -21,6 +21,11 @@ $ - swaps stacks
 0-9 - integer literal
 "*" - string literal
 
+{ - starts a function block until } is encountered then pushes the block to the stack
+
+| - begins a alphanumeric alias, pops the top element off the stack and stores it as the alias of the name
+
+
 """
 
 class UlangInterpreter(object):
@@ -29,6 +34,11 @@ class UlangInterpreter(object):
     self.reset()
 
     self.commands = {
+      '|': {
+        'name': 'alias def',
+        'min': 1,
+        'function': self.op_aliasdef
+      },
       '"': {
         'name': 'string literal',
         'min': 0,
@@ -133,9 +143,45 @@ class UlangInterpreter(object):
         'name': 'debug',
         'min': 0,
         'function': self.op_debug
+      },
+      '@': {
+        'name': 'alias recall',
+        'min': 0,
+        'function': self.op_aliasrecall
       }
     }
   
+  def op_aliasrecall(self, p):
+    ''''''
+    d = 1
+    while d < len(p) and p[d].isalpha():
+      d += 1
+    if d == 1:
+      self.error('alias cannot be empty')
+      return d
+    alias = p[1:d]
+
+    if alias in self.store.keys():
+      self.stack.append(self.store[alias])
+    else:
+      self.error('alias does not exist')
+
+    return d - 1
+
+  def op_aliasdef(self, p):
+    ''''''
+    d = 1
+    while d < len(p) and p[d].isalpha():
+      d += 1
+    if d == 1:
+      self.error('alias definition cannot be empty')
+      return d
+    alias = p[1:d]
+    value = self.stack.pop()
+    self.store[alias] = value
+    print('defined {} as {}'.format(alias, value))
+    return d - 1
+
   def op_stringliteral(self, p):
     ''''''
     d = 1
