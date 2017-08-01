@@ -1,7 +1,7 @@
 import sys
 
 """
-The formal interpreter for uclang.
+The formal interpreter for ulang.
 
 ; - Discards the top item
 : - Duplicates the top item
@@ -21,9 +21,12 @@ $ - swaps stacks
 0-9 - integer literal
 "*" - string literal
 
+# - comments
+
 { - starts a function block until } is encountered then pushes the block to the stack
 
 | - begins a alphanumeric alias, pops the top element off the stack and stores it as the alias of the name
+@ - recall an alias value
 
 
 """
@@ -34,6 +37,16 @@ class UlangInterpreter(object):
     self.reset()
 
     self.commands = {
+      '{': {
+        'name': 'block begin',
+        'min': 0,
+        'function': self.op_blockbegin
+      },
+      '}': {
+        'name': 'block end',
+        'min': 0,
+        'function': self.op_blockend
+      },
       '|': {
         'name': 'alias def',
         'min': 1,
@@ -151,6 +164,26 @@ class UlangInterpreter(object):
       }
     }
   
+  def op_blockbegin(self, p):
+    ''''''
+    depth = 1
+    offset = 1
+    while offset < len(p) and depth > 0:
+      if p[offset] == '}':
+        depth -= 1
+      elif p[offset] == '{':
+        depth += 1
+      else:
+        offset += 1
+
+    self.stack.append(p[1:offset])
+
+    return offset
+  
+  def op_blockend(self, p):
+    ''''''
+    pass
+  
   def op_aliasrecall(self, p):
     ''''''
     d = 1
@@ -179,7 +212,6 @@ class UlangInterpreter(object):
     alias = p[1:d]
     value = self.stack.pop()
     self.store[alias] = value
-    print('defined {} as {}'.format(alias, value))
     return d - 1
 
   def op_stringliteral(self, p):
@@ -331,11 +363,15 @@ class UlangInterpreter(object):
   
   def debug(self):
     valid = ['c', 's', 'z']
-    prompt = 'Debug: ((c)ontinue, (s)tack, (z)tack) > '
+    prompt = 'Debug: ((c)ontinue, (s)tack, (z)tack, (a)liases) > '
     while True:
       c = input(prompt)
       if c == 'c':
         return
+      elif c == 'a':
+        print('Aliases: ')
+        for a, v in self.store.items():
+          print('  {}: {}'.format(a, v))
       elif c == 's':
         print('Stack: ')
         for i in range(len(self.stack)):
