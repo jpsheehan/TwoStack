@@ -1,23 +1,5 @@
-# sum all items on stack until 0 is encountered
-#\[\+\];
-
-# product of all items on stack until 0 is encountered
-#\[\*\];
-
-# push a range of values in reverse order to the stack
-#[:1\-];
-
-  # push the numbers from 10 to 1
-  # 10 [:1\-];
-
 # factorial of top element
 # 0\[:1\-];\[\*\];
 
-  # find the factorial of 5
-  #5 0\[:1\-]; [\*\];
 
-# prints a string
-# 0$0$""[`]$[.;]
-
-  # print the hello world with a new line
-  # 0$0 12$"Hello, World!"[`]$[.;]
+# 

@@ -327,7 +327,6 @@ class UlangInterpreter(object):
     self.loop = {}
 
     self.index = 0
-
     while (self.index < len(program)):
       p = program[self.index:]
       extra_advance = None
