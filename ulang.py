@@ -5,13 +5,18 @@ The formal interpreter for uclang.
 : - Duplicates the top item
 \ - Swaps the top two items
 \\ - Swaps the top and third-from-top items
-/
-//
-+
--
-*
-^
+$ - swaps stacks
+` - pops from the stack and pushes to the ztack
+
+/ - division
+// - integer division
++ - addition
+- - subtraction
+* - multiplication
+^ - power
 [ - loops until the top element of the stack is equal to 0, then jumps to the corresponding ]
+
+0-9 - integer literal
 
 """
 
@@ -22,6 +27,7 @@ class UcLang(object):
   
   def reset(self):
     self.stack = []
+    self.ztack = []
     self.store = {}
   
   def error(self, message):
@@ -154,6 +160,12 @@ class UcLang(object):
           break
       elif p[0] == ']':
         self.index = self.loop[self.index] - 1
+      elif p[0] == '.':
+        if len(self.stack) > 0:
+          print(chr(self.stack[-1]), end='')
+        else:
+          self.error('not enough items on stack')
+          break
       elif p[0].isdigit():
         d = 1
         while d < len(p) and p[d].isdigit():
@@ -165,6 +177,23 @@ class UcLang(object):
         while d < len(p) and p[d] != '\n':
           d += 1
         extra_advance += d
+      elif p[0] == '"':
+        # string literal
+        d = 1
+        while d < len(p) and p[d] != '"':
+          self.stack.append(ord(p[d]))
+          d += 1
+        extra_advance = d
+      elif p[0] == '$':
+        t = self.stack
+        self.stack = self.ztack
+        self.ztack = t
+      elif p[0] == '`':
+        if len(self.stack) > 0:
+          self.ztack.append(self.stack.pop())
+        else:
+          self.error('not enough items on stack')
+          break
       elif p[0] == '_':
         print('Debug Information:')
         print('Stack: ')
