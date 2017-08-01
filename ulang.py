@@ -17,10 +17,11 @@ $ - swaps stacks
 [ - loops until the top element of the stack is equal to 0, then jumps to the corresponding ]
 
 0-9 - integer literal
+"*" - string literal
 
 """
 
-class UcLang(object):
+class UlangInterpreter(object):
 
   def __init__(self):
     self.reset()
@@ -125,6 +126,11 @@ class UcLang(object):
         'name': 'comment',
         'min': 0,
         'function': self.op_comment
+      },
+      '_': {
+        'name': 'debug',
+        'min': 0,
+        'function': self.op_debug
       }
     }
   
@@ -305,6 +311,15 @@ class UcLang(object):
 
     print('error: {} on line {}, column {}'.format(message, self.line_number, self.char_number))
   
+  def execute_file(self, filename):
+    try:
+      with open(filename) as file:
+        program = file.read()
+        self.execute(program)
+    except:
+      print('An unexpected error occurred')
+      raise
+  
   def execute(self, program):
     self.line_number = 1
     self.char_number = 1
@@ -315,11 +330,17 @@ class UcLang(object):
 
     while (self.index < len(program)):
       p = program[self.index:]
-      extra_advance = 0
+      extra_advance = None
 
       if p[0] in self.commands.keys():
-        extra_advance = self.commands[p[0]]['function'](p)
+        cmd = self.commands[p[0]]
+        if len(self.stack) >= cmd['min']:
+          extra_advance = self.commands[p[0]]['function'](p)
+        else:
+          self.error('not enough elements on the stack')
+          break
       elif p[0].isdigit():
+        # shim to get integer literals working
         extra_advance = self.op_intliteral(p)
       else:
         self.error('unknown symbol \'{}\''.format(p[0]))
@@ -331,7 +352,6 @@ class UcLang(object):
       self.char_number += 1 + extra_advance
       self.index += 1 + extra_advance
 
-with open('program.u') as file:
-  l = UcLang()
-  program = file.read()
-  l.execute(program)
+if __name__ == '__main__':
+  interpreter = UlangInterpreter()
+  interpreter.execute_file('program.u')
