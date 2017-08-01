@@ -25,7 +25,7 @@ class UcLang(object):
   def __init__(self):
     self.reset()
 
-    commands = {
+    self.commands = {
       '"': {
         'name': 'string literal',
         'min': 0,
@@ -320,10 +320,13 @@ class UcLang(object):
       if p[0] in self.commands.keys():
         extra_advance = self.commands[p[0]]['function'](p)
       elif p[0].isdigit():
-        self.op_intliteral(p)
+        extra_advance = self.op_intliteral(p)
       else:
         self.error('unknown symbol \'{}\''.format(p[0]))
         break
+      
+      if extra_advance is None:
+        extra_advance = 0
 
       self.char_number += 1 + extra_advance
       self.index += 1 + extra_advance
