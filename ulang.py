@@ -1,3 +1,5 @@
+import sys
+
 """
 The formal interpreter for uclang.
 
@@ -353,4 +355,6 @@ class UlangInterpreter(object):
 
 if __name__ == '__main__':
   interpreter = UlangInterpreter()
-  interpreter.execute_file('program.u')
+  
+  if len(sys.argv) >= 2:
+    interpreter.execute_file(sys.argv[1])
