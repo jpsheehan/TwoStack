@@ -26,7 +26,9 @@ $ - swaps stacks
 { - starts a function block until } is encountered then pushes the block to the stack
 
 | - begins a alphanumeric alias, pops the top element off the stack and stores it as the alias of the name
-@ - recall an alias value
+a-z - recalls an alias and pushes the value to the stack
+
+@ - call a function
 
 . - if the topmost value is +ve, print the character value, else, pop the value and jump
 
@@ -160,11 +162,16 @@ class UlangInterpreter(object):
         'function': self.op_debug
       },
       '@': {
-        'name': 'alias recall',
+        'name': 'exec block',
         'min': 0,
-        'function': self.op_aliasrecall
+        'function': self.op_execblock
       }
     }
+  
+  def op_execblock(self, p):
+    ''''''
+    self.callstack.append(self.index)
+    self.index = self.stack.pop()
   
   def op_blockbegin(self, p):
     ''''''
@@ -178,7 +185,7 @@ class UlangInterpreter(object):
       else:
         offset += 1
 
-    self.stack.append((-1) * self.index - 1)
+    self.stack.append(self.index)
 
     return offset
   
@@ -188,13 +195,13 @@ class UlangInterpreter(object):
   
   def op_aliasrecall(self, p):
     ''''''
-    d = 1
+    d = 0
     while d < len(p) and p[d].isalpha():
       d += 1
-    if d == 1:
+    if d == 0:
       self.error('alias cannot be empty')
       return d
-    alias = p[1:d]
+    alias = p[0:d]
 
     if alias in self.store.keys():
       self.stack.append(self.store[alias])
@@ -287,14 +294,7 @@ class UlangInterpreter(object):
 
   def op_print(self, p):
     ''''''
-    item = self.stack[-1]
-    
-    if item >= 0:
-      print(chr(item), end='')
-    else:
-      self.callstack.append(self.index)
-      
-      self.index = abs(self.stack.pop()) - 1
+    print(chr(self.stack[-1]), end='')
 
   def op_discard(self, p):
     '''Pop the topmost item of the stack.'''
@@ -435,6 +435,9 @@ class UlangInterpreter(object):
       elif p[0].isdigit():
         # shim to get integer literals working
         extra_advance = self.op_intliteral(p)
+      elif p[0].isalpha():
+        # shim to get alias recollection without any leading symbols
+        extra_advance = self.op_aliasrecall(p)
       else:
         self.error('unknown symbol \'{}\''.format(p[0]))
         break
