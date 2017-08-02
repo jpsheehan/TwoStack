@@ -333,7 +333,8 @@ class UlangInterpreter(object):
   
   def op_subtract(self, p):
     ''''''
-    self.stack.append(self.stack.pop() - self.stack.pop())
+    a = self.stack.pop()
+    self.stack.append(self.stack.pop() - a)
   
   def op_multiply(self, p):
     ''''''
@@ -349,17 +350,20 @@ class UlangInterpreter(object):
         self.error('not enough items on stack')
     else:
       if len(self.stack) > 1: # division
-        self.stack.append(self.stack.pop() / self.stack.pop())
+        a = self.stack.pop()
+        self.stack.append(self.stack.pop() / a)
       else:
         self.error('not enough items on stack')
   
   def op_intdivide(self, p):
     ''''''
-    self.stack.append(self.stack.pop() // self.stack.pop())
+    a = self.stack.pop()
+    self.stack.append(self.stack.pop() / a)
 
   def op_modulo(self, p):
     ''''''
-    self.stack.append(self.stack.pop() % self.stack.pop())
+    a = self.stack.pop()
+    self.stack.append(self.stack.pop() % a)
   
   def op_power(self, p):
     ''''''
@@ -379,19 +383,28 @@ class UlangInterpreter(object):
       if c == 'c':
         return
       elif c == 'a':
-        print('Aliases: ')
-        for a, v in self.store.items():
-          print('  {}: {}'.format(a, v))
+        self.print_aliases()
       elif c == 's':
-        print('Stack: ')
-        for i in range(len(self.stack)):
-          print('  {}: {}'.format(i, self.stack[i]))
+        self.print_stack()
       elif c == 'z':
-        print('Ztack: ')
-        for i in range(len(self.ztack)):
-          print('  {}: {}'.format(i, self.ztack[i]))
+        self.print_ztack()
       else:
         print('unknown command')
+  
+  def print_stack(self):
+    print('Stack: ')
+    for i in range(len(self.stack)):
+      print('  {}: {}'.format(i, self.stack[i]))
+
+  def print_ztack(self):
+    print('Ztack: ')
+    for i in range(len(self.ztack)):
+      print('  {}: {}'.format(i, self.ztack[i]))
+
+  def print_aliases(self):
+    print('Aliases: ')
+    for a, v in self.store.items():
+      print('  {}: {}'.format(a, v))
   
   def error(self, message):
     source_start = max(0, self.index - 10)
@@ -453,3 +466,4 @@ if __name__ == '__main__':
   
   if len(sys.argv) >= 2:
     interpreter.execute_file(sys.argv[1])
+    #interpreter.print_stack()
