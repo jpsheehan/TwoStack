@@ -46,13 +46,24 @@ A simple stack based language inspired by [GolfScript](http://www.golfscript.com
 * Define an alias: |
 * Recall an alias by typing the alias symbol
 * Unconditional jump: @
+* Conditional jump: ?
 * Print character: .
 * Read character: ,
 
 ## Examples
 
-###### Hello, World!
+##### Hello, World!
 This example displays the string "Hello, World!" and quits.
 ```
 "Hello, World!"[`]$[.;]
+```
+
+##### If Else Statement
+This example displays the string "true" if the condition is true and "false" if the condition is false.
+```
+# define a print function
+{[`]$[.;]}|print
+
+# execute a particular block depending on the condition (10 == 10).
+{"false"print@}{;"true"print@{}0}10 10=?;@
 ```

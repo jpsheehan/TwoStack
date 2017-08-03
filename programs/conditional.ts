@@ -9,5 +9,4 @@
 # condition code
 # ?;@
 {[`]$[.;]}|print
-{"false"}{;"true"{}0}10 11=?;@
-print@
+{"false"print@}{;"true"print@{}0}10 10=?;@
