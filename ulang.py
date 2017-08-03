@@ -192,9 +192,27 @@ class UlangInterpreter(object):
         'name': 'greater than',
         'min': 2,
         'function': self.op_condgreaterthan
+      },
+      ',': {
+        'name': 'read char',
+        'min': 0,
+        'function': self.op_readchar
       }
     }
   
+  def op_readchar(self, p):
+    '''Reads a character from stdin or -1 if empty.'''
+    if len(self.input) > 0:
+      self.stack.append(ord(self.input[0]))
+      self.input = self.input[1:]
+    else:
+      self.input = input('> ')
+      
+      if len(self.input) > 0:
+        self.op_readchar(p)
+      else:
+        self.stack.append(-1)
+
   def op_condgreaterthan(self, p):
     ''''''
     a = self.stack.pop()
@@ -419,6 +437,7 @@ class UlangInterpreter(object):
     self.ztack = []
     self.store = {}
     self.callstack = []
+    self.input = ''
   
   def debug(self):
     valid = ['c', 's', 'z']
