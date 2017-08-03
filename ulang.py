@@ -143,7 +143,7 @@ class UlangInterpreter(object):
       },
       '[': {
         'name': 'loop begin',
-        'min': 1,
+        'min': 0,
         'function': self.op_loopbegin
       },
       ']': {
@@ -271,7 +271,7 @@ class UlangInterpreter(object):
       self.loop[self.index] = self.index + offset
       self.loop[offset + self.index] = self.index
 
-    if self.stack[-1] == 0:
+    if len(self.stack) == 0 or self.stack[-1] == 0:
       self.index = self.loop[self.index]
   
   def op_loopend(self, p):
