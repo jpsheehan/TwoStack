@@ -1,10 +1,10 @@
 import sys
 
 """
-The formal interpreter for ulang.
+The formal interpreter for TwoStack.
 """
 
-class UlangInterpreter(object):
+class TwoStackInterpreter(object):
 
   def __init__(self):
     self.reset()
@@ -488,7 +488,7 @@ class UlangInterpreter(object):
       self.index += 1 + extra_advance
 
 if __name__ == '__main__':
-  interpreter = UlangInterpreter()
+  interpreter = TwoStackInterpreter()
   
   if len(sys.argv) >= 2:
     interpreter.execute_file(sys.argv[1])
