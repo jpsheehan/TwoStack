@@ -32,6 +32,13 @@ a-z - recalls an alias and pushes the value to the stack
 
 . - if the topmost value is +ve, print the character value, else, pop the value and jump
 
+Conditional Operators:
+
+= - equal to
+! - not
+< - less than
+> - greater than
+
 
 """
 
@@ -165,8 +172,46 @@ class UlangInterpreter(object):
         'name': 'exec block',
         'min': 0,
         'function': self.op_execblock
+      },
+      '!': {
+        'name': 'not',
+        'min': 1,
+        'function': self.op_not
+      },
+      '=': {
+        'name': 'equal to',
+        'min': 2,
+        'function': self.op_condequal
+      },
+      '<': {
+        'name': 'less than',
+        'min': 2,
+        'function': self.op_condlessthan
+      },
+      '>': {
+        'name': 'greater than',
+        'min': 2,
+        'function': self.op_condgreaterthan
       }
     }
+  
+  def op_condgreaterthan(self, p):
+    ''''''
+    a = self.stack.pop()
+    self.stack.append(int(self.stack.pop() > a))
+  
+  def op_condlessthan(self, p):
+    ''''''
+    a = self.stack.pop()
+    self.stack.append(int(self.stack.pop() < a))
+
+  def op_condequal(self, p):
+    ''''''
+    self.stack.append(int(self.stack.pop() == self.stack.pop()))
+  
+  def op_not(self, p):
+    ''''''
+    self.stack.append(int(not self.stack.pop()))
   
   def op_execblock(self, p):
     ''''''
