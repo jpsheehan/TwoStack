@@ -217,12 +217,11 @@ class TwoStackInterpreter(object):
         depth -= 1
       elif p[offset] == '{':
         depth += 1
-      else:
-        offset += 1
+      offset += 1
 
     self.stack.append(self.index)
 
-    return offset
+    return offset - 1
   
   def op_blockend(self, p):
     ''''''
