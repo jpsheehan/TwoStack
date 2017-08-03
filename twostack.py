@@ -10,6 +10,11 @@ class TwoStackInterpreter(object):
     self.reset()
 
     self.commands = {
+      '?': {
+        'name': 'cond jump',
+        'min': 2,
+        'function': self.op_condjump
+      },
       '{': {
         'name': 'block begin',
         'min': 0,
@@ -162,6 +167,11 @@ class TwoStackInterpreter(object):
       }
     }
   
+  def op_condjump(self, p):
+    ''''''
+    if self.stack.pop():
+      self.op_execblock(p)
+
   def op_readchar(self, p):
     '''Reads a character from stdin or -1 if empty.'''
     if len(self.input) > 0:
