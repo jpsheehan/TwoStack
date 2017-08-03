@@ -2,44 +2,6 @@ import sys
 
 """
 The formal interpreter for ulang.
-
-; - Discards the top item
-: - Duplicates the top item
-\ - Swaps the top two items
-\\ - Swaps the top and third-from-top items
-$ - swaps stacks
-` - pops from the stack and pushes to the ztack
-
-/ - division
-// - integer division
-+ - addition
-- - subtraction
-* - multiplication
-^ - power
-[ - loops until the top element of the stack is equal to 0, then jumps to the corresponding ]
-
-0-9 - integer literal
-"*" - string literal
-
-# - comments until newline
-
-{ - starts a function block until } is encountered then pushes the block to the stack
-
-| - begins a alphanumeric alias, pops the top element off the stack and stores it as the alias of the name
-a-z - recalls an alias and pushes the value to the stack
-
-@ - call a function
-
-. - if the topmost value is +ve, print the character value, else, pop the value and jump
-
-Conditional Operators:
-
-= - equal to
-! - not
-< - less than
-> - greater than
-
-
 """
 
 class UlangInterpreter(object):
