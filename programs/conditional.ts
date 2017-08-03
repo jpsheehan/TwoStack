@@ -8,5 +8,6 @@
 # {}0}
 # condition code
 # ?;@
-
-{"false"}{;"true"{}0}10 11=?;@[`]$[.;]
+{[`]$[.;]}|print
+{"false"}{;"true"{}0}10 11=?;@
+print@

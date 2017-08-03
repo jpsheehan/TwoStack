@@ -411,8 +411,7 @@ class TwoStackInterpreter(object):
     self.input = ''
   
   def debug(self):
-    valid = ['c', 's', 'z']
-    prompt = 'Debug: ((c)ontinue, (s)tack, (z)tack, (a)liases) > '
+    prompt = 'Debug: ((c)ontinue, (s)tack, (z)tack, (a)liases, (q)uit) > '
     while True:
       c = input(prompt)
       if c == 'c':
@@ -423,6 +422,8 @@ class TwoStackInterpreter(object):
         self.print_stack()
       elif c == 'z':
         self.print_ztack()
+      elif c == 'q':
+        sys.exit()
       else:
         print('unknown command')
   
