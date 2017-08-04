@@ -67,3 +67,9 @@ This example displays the string "true" if the condition is true and "false" if 
 # execute a particular block depending on the condition (10 == 10).
 {"false"print@}{;"true"print@{}0}10 10=?;@
 ```
+
+#### FizzBuzz Program
+The infamous fizzbuzz test:
+```
+{[`]$[.;];$}|p{$0$[:10%48+`10//]$[`];$}|a$1 1[;${{{$:`$a@$0$p@10.}{;0$0$"Buzz"p@10.{}0}$:`$5%0=?;@}{;0$0$"Fizz"10p@{}0}$:`$3%0=?;@}{;0$0$"Fizzbuzz"10p@{}0}$:`$:3%0=\5%0=&?;@$1+:100<]
+```
