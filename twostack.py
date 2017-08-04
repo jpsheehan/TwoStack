@@ -340,6 +340,7 @@ class TwoStackInterpreter(object):
   def op_print(self, p):
     ''''''
     print(chr(self.stack[-1]), end='')
+    sys.stdout.flush()
 
   def op_discard(self, p):
     '''Pop the topmost item of the stack.'''
@@ -454,6 +455,10 @@ class TwoStackInterpreter(object):
       print('  {}: {}'.format(a, v))
   
   def error(self, message):
+    # better line and column display:
+    line = self.program[:self.index].count('\n') + 1
+    column = self.program[:self.index].rfind('\n') - self.index
+
     source_start = max(0, self.index - 10)
     source_start = max(self.program.rfind('\n', source_start, self.index) + 1, source_start)
     source_end = min(len(self.program) - 1, self.index + 10)
@@ -463,7 +468,7 @@ class TwoStackInterpreter(object):
     print(self.program[source_start:source_end])
     print((' ' * source_offset) + '^')
 
-    print('error: {} on line {}, column {}'.format(message, self.line_number, self.char_number))
+    print('error: {} on line {}, column {}'.format(message, line, column))
   
   def execute_file(self, filename):
     try:

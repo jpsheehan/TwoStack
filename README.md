@@ -52,13 +52,13 @@ A simple stack based language inspired by [GolfScript](http://www.golfscript.com
 
 ## Examples
 
-##### Hello, World!
+#### Hello, World!
 This example displays the string "Hello, World!" and quits.
 ```
 "Hello, World!"[`]$[.;]
 ```
 
-##### If Else Statement
+#### If Else Statement
 This example displays the string "true" if the condition is true and "false" if the condition is false.
 ```
 # define a print function
