@@ -164,8 +164,19 @@ class TwoStackInterpreter(object):
         'name': 'read char',
         'min': 0,
         'function': self.op_readchar
+      },
+      '&': {
+        'name': 'logical and',
+        'min': 2,
+        'function': self.op_logicaland
       }
     }
+  
+  def op_logicaland(self, p):
+    ''''''
+    a = self.stack.pop()
+    b = self.stack.pop()
+    self.stack.append(int(a and b))
   
   def op_condjump(self, p):
     ''''''
