@@ -404,7 +404,7 @@ class TwoStackInterpreter(object):
   def op_intdivide(self, p):
     ''''''
     a = self.stack.pop()
-    self.stack.append(self.stack.pop() / a)
+    self.stack.append(self.stack.pop() // a)
 
   def op_modulo(self, p):
     ''''''
