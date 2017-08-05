@@ -106,9 +106,9 @@ class TwoStackFeatureProvider(object):
                 'function': self.op_power
             },
             '.': {
-                'name': 'print',
+                'name': 'output',
                 'min': 1,
-                'function': self.op_print
+                'function': self.op_output
             },
             '`': {
                 'name': 'crosspop',
@@ -161,9 +161,9 @@ class TwoStackFeatureProvider(object):
                 'function': self.op_condgreaterthan
             },
             ',': {
-                'name': 'read char',
+                'name': 'input',
                 'min': 0,
-                'function': self.op_readchar
+                'function': self.op_input
             },
             '&': {
                 'name': 'logical and',
@@ -191,8 +191,8 @@ class TwoStackFeatureProvider(object):
         if self.stack.pop():
             self.op_execblock()
 
-    def op_readchar(self):
-        '''Read a character from stdin.
+    def op_input(self):
+        '''The input operator.
         Pushes the ordinal value of the next character in the stream or -1 if the stream is empty.
         '''
         try:
@@ -422,7 +422,7 @@ class TwoStackFeatureProvider(object):
         elem = self.stack.pop()
         self.ztack.append(elem)
 
-    def op_print(self):
+    def op_output(self):
         '''The output operator.
         Prints the top element of the stack as an ascii character.
         This is peeked, not popped.
