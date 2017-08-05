@@ -5,6 +5,7 @@ TODO: Show command line arguments, etc...
 '''
 
 import sys
+import re
 
 from twostack_feature_provider import TwoStackFeatureProvider
 
@@ -93,13 +94,24 @@ class TwoStackInterpreter(TwoStackFeatureProvider):
         while self.index < len(program):
             rest = program[self.index:]
             extra_advance = None
+            cmd = None
 
+            # check for 2 character operators
             if rest[:2] in self.commands.keys():
                 cmd = self.commands[rest[:2]]
+
+            # check for 1 character operators
             elif rest[0] in self.commands.keys():
                 cmd = self.commands[rest[0]]
+
+            # check for regular expressions
             else:
-                cmd = None
+                for key in self.commands:
+                    this_cmd = self.commands[key]
+                    if this_cmd.get('is_regex', False):
+                        if re.match(key, rest):
+                            cmd = this_cmd
+                            break
 
             if cmd is not None:
                 if len(self.stack) >= cmd['min']:
@@ -107,14 +119,6 @@ class TwoStackInterpreter(TwoStackFeatureProvider):
                 else:
                     self.error('not enough elements on the stack')
                     break
-
-            elif rest[0].isdigit():
-                # shim to get integer literals working
-                extra_advance = self.op_intliteral()
-
-            elif rest[0].isalpha():
-                # shim to get alias recollection without any leading symbols
-                extra_advance = self.op_aliasrecall()
 
             elif rest[0] == '_':
                 self.debug()
@@ -134,6 +138,7 @@ def main():
 
     if len(sys.argv) >= 2:
         interpreter.execute_file(sys.argv[1])
+    # TODO: work out a scheme for printing help
 
 if __name__ == '__main__':
     main()

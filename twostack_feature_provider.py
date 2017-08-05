@@ -191,6 +191,18 @@ class TwoStackFeatureProvider(object):
                 'min': 0,
                 'function': self.op_comment
             },
+            '^[a-zA-Z]+': {
+                'name': 'alias recall',
+                'min': 0,
+                'function': self.op_aliasrecall,
+                'is_regex': True
+            },
+            '^[0-9]+': {
+                'name': 'integer literal',
+                'min': 0,
+                'function': self.op_intliteral,
+                'is_regex': True
+            }
         }
 
     # ===== Mathematical Operators ===== #
