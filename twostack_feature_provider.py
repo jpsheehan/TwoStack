@@ -1,3 +1,9 @@
+'''TwoStackFeatureProvider
+Author: Jesse Sheehan <jesse@sheehan.nz>
+
+Contains the TwoStackFeatureProvider which defines most of the operators in the language.
+'''
+
 import sys
 import os
 
@@ -421,9 +427,14 @@ class TwoStackFeatureProvider(object):
         Prints the top element of the stack as an ascii character.
         This is peeked, not popped.
         '''
-        char = chr(self.stack[-1])
+        try:
+            char = chr(self.stack[-1])
+
+        except ValueError:
+            # handle out of range character values
+            char = ''
+
         sys.stdout.write(char)
-        #TODO: add try catch for printing invalid ascii
 
         # flush if char is a newline character
         if char in os.linesep:
