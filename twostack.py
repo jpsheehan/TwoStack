@@ -293,8 +293,7 @@ class TwoStackInterpreter(object):
 
   def op_newline(self, p):
     ''''''
-    self.line_number += 1
-    self.char_number = 0
+    pass
 
   def op_whitespace(self, p):
     ''''''
@@ -484,8 +483,6 @@ class TwoStackInterpreter(object):
       raise
   
   def execute(self, program):
-    self.line_number = 1
-    self.char_number = 1
     self.program = program
     self.loop = {}
 
@@ -514,7 +511,6 @@ class TwoStackInterpreter(object):
       if extra_advance is None:
         extra_advance = 0
 
-      self.char_number += 1 + extra_advance
       self.index += 1 + extra_advance
 
 if __name__ == '__main__':
