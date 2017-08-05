@@ -1,6 +1,5 @@
 {[`]$[.;];$}|print
-{$0$[:10%48+`10//]$[`];$}|asciidec
-30|max
+{$0$[:10%48+`10/]$[`];$}|asciidec
 
 $1 1
 [
@@ -42,5 +41,5 @@ $1 1
   ?;@
   
   # increment the counter and break the loop if it is less than or equal to 0
-  $1+:max<
+  $1+:100<
 ]

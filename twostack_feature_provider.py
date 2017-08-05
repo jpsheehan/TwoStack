@@ -89,11 +89,6 @@ class TwoStackFeatureProvider(object):
                 'min': 2,
                 'function': self.op_divide
             },
-            '//': {
-                'name': 'int divide',
-                'min': 2,
-                'function': self.op_intdivide
-            },
             '%': {
                 'name': 'modulo',
                 'min': 2,
@@ -495,11 +490,6 @@ class TwoStackFeatureProvider(object):
         self.stack.append(elem1 * elem2)
 
     def op_divide(self):
-        '''TODO: remove this'''
-        a = self.stack.pop()
-        self.stack.append(self.stack.pop() / a)
-
-    def op_intdivide(self):
         '''The division operator.
         Pops two elements and divides the second by the first.
         Pushes the quotient.
@@ -507,7 +497,6 @@ class TwoStackFeatureProvider(object):
         elem1 = self.stack.pop()
         elem2 = self.stack.pop()
         self.stack.append(elem2 // elem1)
-        return 1
 
     def op_modulo(self):
         '''The modulus operator.
