@@ -1,45 +1,40 @@
-{[`]$[.;];$}|print
-{$0$[:10%48+`10/]$[`];$}|asciidec
-
-$1 1
+{[`]$[.;];$}|p 0[The print function];
+$1 1 0[Start at 1];
 [
   ;$
-
   {
     {
       {
-        # else print number
-        $:`$ # get a copy of counter
-        asciidec@
-        $0$print@10.
-        
+        $:`$ 0[Push a copy of the counter];
+        $0$[:10%48+`10/]$[`];$ 0[Push the counter as a string];
+        $0$10p@ 0[Print the string followed by a newline];
       }
       {;
-        # if divisible by 5 then print buzz
-        0$0$"Buzz"10print@
+        0[ print "Buzz" ];
+        0$0$"Buzz"10p@
       {}0}
 
-      $:`$ # get a copy of the counter
-      5%0=?;@ # check for divisibility
+      $:`$ 0[Push a copy of the counter];
+      
+      5%0=?;@ 0[If the counter is divisible by 5 then execute the top block, else execute the second block.];
     }
     {;
-      # if divisible by 3 then print fizz
-      0$0$"Fizz"10print@
+      0[ print "Fizz" ];
+      0$0$"Fizz"10p@
     {}0}
+
+    $:`$ 0[Push a copy of the counter];
     
-    $:`$ # get a copy of the counter
-    3%0=?;@ # check for divisibility
+    3%0=?;@ 0[If the counter is disible by 3 then execute the top block, else execute the second block. ];
   }
   {;
-    # if divisible by 5 and 3
-    0$0$"Fizzbuzz"10print@
+    0[ print "Fizzbuzz" ];
+    0$0$"Fizzbuzz"10p@
   {}0}
 
-  $:`$: # push the 2 copies of the counter onto the main stack
+  $:`$: 0[ Push two copies of the counter to the stack ];
   
-  3%0=\5%0=&
-  ?;@
+  3%0=\5%0=&?;@ 0[ if the counter is divisible by 3 and divisible by 5 then execute the top block, else the second block ];
   
-  # increment the counter and break the loop if it is less than or equal to 0
-  $1+:100<
+  $1+:100< 0[ break the loop if the counter is greater than or equal to 100. ];
 ]

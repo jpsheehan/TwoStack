@@ -1,5 +1,5 @@
-# prints a string
-0$0$""[`]$[.;]
+0[ prints a string ];
+[`]$[.;]$
 
-# example: print "hi" to the screen
-# 0$0$"hi"[`]$[.;]
+0 [ example: print "hi" to the screen ];
+0[ 0$0$"hi"[`]$[.;]$ ];

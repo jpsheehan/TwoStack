@@ -1,2 +1,2 @@
-# prints the string and exits
-0$0$"Hello, World!"[`]$[.;]
+0[ prints the string and exits ];
+0$0$"Hello, World!"[`]$[.;];$;
