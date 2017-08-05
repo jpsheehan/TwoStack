@@ -117,6 +117,11 @@ class TwoStackFeatureProvider(object):
                 'min': 2,
                 'function': self.op_logicaland
             },
+            '|': {
+                'name': 'logical or',
+                'min': 2,
+                'function': self.op_logicalor
+            },
 
             # ===== Code Execution ===== #
 
@@ -347,6 +352,14 @@ class TwoStackFeatureProvider(object):
         elem1 = self.stack.pop()
         elem2 = self.stack.pop()
         self.stack.append(int(elem1 and elem2))
+    
+    def op_logicalor(self):
+        '''The logical 'or' operator.
+        Pops the top two elements and pushes the boolean result.
+        '''
+        elem1 = self.stack.pop()
+        elem2 = self.stack.pop()
+        self.stack.append(int(elem1 or elem2))
 
     # ===== Code Execution ===== #
 
