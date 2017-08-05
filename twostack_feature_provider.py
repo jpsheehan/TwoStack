@@ -414,8 +414,9 @@ class TwoStackFeatureProvider(object):
                 elif rest[offset] == '[':
                     depth += 1
 
-                else:
-                    offset += 1
+                offset += 1
+
+            offset -= 1
 
             # set cache entries for the start and end of the loop
             self.loop[self.index] = self.index + offset
