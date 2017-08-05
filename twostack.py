@@ -185,16 +185,15 @@ class TwoStackInterpreter(object):
 
   def op_readchar(self, p):
     '''Reads a character from stdin or -1 if empty.'''
-    if len(self.input) > 0:
-      self.stack.append(ord(self.input[0]))
-      self.input = self.input[1:]
+    try:
+      char = sys.stdin.read(1)
+    except:
+      char = ''
+    
+    if len(char) > 0:
+      self.stack.append(ord(char))
     else:
-      self.input = input('> ')
-      
-      if len(self.input) > 0:
-        self.op_readchar(p)
-      else:
-        self.stack.append(-1)
+      self.stack.append(-1)
 
   def op_condgreaterthan(self, p):
     ''''''
@@ -421,6 +420,7 @@ class TwoStackInterpreter(object):
     self.store = {}
     self.callstack = []
     self.input = ''
+    self.input_pointer = 0
   
   def debug(self):
     prompt = 'Debug: ((c)ontinue, (s)tack, (z)tack, (a)liases, (q)uit) > '
