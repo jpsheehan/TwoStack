@@ -173,18 +173,18 @@ class TwoStackInterpreter(object):
       }
     }
   
-  def op_logicaland(self, p):
+  def op_logicaland(self):
     ''''''
     a = self.stack.pop()
     b = self.stack.pop()
     self.stack.append(int(a and b))
   
-  def op_condjump(self, p):
+  def op_condjump(self):
     ''''''
     if self.stack.pop():
-      self.op_execblock(p)
+      self.op_execblock()
 
-  def op_readchar(self, p):
+  def op_readchar(self):
     '''Reads a character from stdin or -1 if empty.'''
     try:
       char = sys.stdin.read(1)
@@ -196,37 +196,38 @@ class TwoStackInterpreter(object):
     else:
       self.stack.append(-1)
 
-  def op_condgreaterthan(self, p):
+  def op_condgreaterthan(self):
     ''''''
     a = self.stack.pop()
     self.stack.append(int(self.stack.pop() > a))
   
-  def op_condlessthan(self, p):
+  def op_condlessthan(self):
     ''''''
     a = self.stack.pop()
     self.stack.append(int(self.stack.pop() < a))
 
-  def op_condequal(self, p):
+  def op_condequal(self):
     ''''''
     self.stack.append(int(self.stack.pop() == self.stack.pop()))
   
-  def op_not(self, p):
+  def op_not(self):
     ''''''
     self.stack.append(int(not self.stack.pop()))
   
-  def op_execblock(self, p):
+  def op_execblock(self):
     ''''''
     self.callstack.append(self.index)
     self.index = self.stack.pop()
   
-  def op_blockbegin(self, p):
+  def op_blockbegin(self):
     ''''''
+    rest = self.program[self.index:]
     depth = 1
     offset = 1
-    while offset < len(p) and depth > 0:
-      if p[offset] == '}':
+    while offset < len(rest) and depth > 0:
+      if rest[offset] == '}':
         depth -= 1
-      elif p[offset] == '{':
+      elif rest[offset] == '{':
         depth += 1
       offset += 1
 
@@ -234,19 +235,20 @@ class TwoStackInterpreter(object):
 
     return offset - 1
   
-  def op_blockend(self, p):
+  def op_blockend(self):
     ''''''
     self.index = self.callstack.pop()
   
-  def op_aliasrecall(self, p):
+  def op_aliasrecall(self):
     ''''''
     d = 0
-    while d < len(p) and p[d].isalpha():
+    rest = self.program[self.index:]
+    while d < len(rest) and rest[d].isalpha():
       d += 1
     if d == 0:
       self.error('alias cannot be empty')
       return d
-    alias = p[0:d]
+    alias = rest[0:d]
 
     if alias in self.store.keys():
       self.stack.append(self.store[alias])
@@ -255,59 +257,63 @@ class TwoStackInterpreter(object):
 
     return d - 1
 
-  def op_aliasdef(self, p):
+  def op_aliasdef(self):
     ''''''
     d = 1
-    while d < len(p) and p[d].isalpha():
+    rest = self.program[self.index:]
+    while d < len(rest) and rest[d].isalpha():
       d += 1
     if d == 1:
       self.error('alias definition cannot be empty')
       return d
-    alias = p[1:d]
+    alias = rest[1:d]
     value = self.stack.pop()
     self.store[alias] = value
     return d - 1
 
-  def op_stringliteral(self, p):
+  def op_stringliteral(self):
     ''''''
     d = 1
-    while d < len(p) and p[d] != '"':
-      self.stack.append(ord(p[d]))
+    rest = self.program[self.index:]
+    while d < len(rest) and rest[d] != '"':
+      self.stack.append(ord(rest[d]))
       d += 1
     return d
   
-  def op_intliteral(self, p):
+  def op_intliteral(self):
     ''''''
     d = 1
-    while d < len(p) and p[d].isdigit():
+    rest = self.program[self.index:]
+    while d < len(rest) and rest[d].isdigit():
       d += 1
-    self.stack.append(int(p[:d]))
+    self.stack.append(int(rest[:d]))
     return d - 1
   
-  def op_comment(self, p):
+  def op_comment(self):
     d = 1
-    while d < len(p) and p[d] != '\n':
+    rest = self.program[self.index:]
+    while d < len(rest) and rest[d] != '\n':
       d += 1
-    self.op_newline(p)
     return d
 
-  def op_newline(self, p):
+  def op_newline(self):
     ''''''
     pass
 
-  def op_whitespace(self, p):
+  def op_whitespace(self):
     ''''''
     pass
   
-  def op_loopbegin(self, p):
+  def op_loopbegin(self):
     ''''''
     if self.index not in self.loop.keys():
       depth = 1
       offset = 1
-      while offset < len(p) and depth > 0:
-        if p[offset] == ']':
+      rest = self.program[self.index:]
+      while offset < len(rest) and depth > 0:
+        if rest[offset] == ']':
           depth -= 1
-        elif p[offset] == '[':
+        elif rest[offset] == '[':
           depth += 1
         else:
           offset += 1
@@ -318,25 +324,25 @@ class TwoStackInterpreter(object):
     if len(self.stack) == 0 or self.stack[-1] == 0:
       self.index = self.loop[self.index]
   
-  def op_loopend(self, p):
+  def op_loopend(self):
     ''''''
     self.index = self.loop[self.index] - 1
 
-  def op_debug(self, p):
+  def op_debug(self):
     ''''''
     self.debug()
   
-  def op_stackswap(self, p):
+  def op_stackswap(self):
     ''''''
     t = self.stack
     self.stack = self.ztack
     self.ztack = t
 
-  def op_crosspop(self, p):
+  def op_crosspop(self):
     ''''''
     self.ztack.append(self.stack.pop())
 
-  def op_print(self, p):
+  def op_print(self):
     ''''''
     char = chr(self.stack[-1])
     sys.stdout.write(char)
@@ -344,19 +350,21 @@ class TwoStackInterpreter(object):
     if char in os.linesep:
       sys.stdout.flush()
 
-  def op_discard(self, p):
+  def op_discard(self):
     '''Pop the topmost item of the stack.'''
     self.stack.pop()
   
-  def op_duplicate(self, p):
+  def op_duplicate(self):
     '''Push a copy of the topmost item of the stack.'''
     self.stack.append(self.stack[-1])
   
-  def op_swap(self, p):
+  def op_swap(self):
     '''Swap the topmost two elements of the stack.'''
-    if len(p) > 1 and p[1] == '\\':
+    rest = self.program[self.index:]
+    #TODO: find a better way to implement double symbol operations
+    if len(rest) > 1 and rest[1] == '\\':
       if len(self.stack) > 2:
-        self.op_3swap(p)
+        self.op_3swap()
         return 1
       else:
         self.error('not enough items on stack')
@@ -366,7 +374,7 @@ class TwoStackInterpreter(object):
       self.stack.append(s)
       self.stack.append(t)
   
-  def op_3swap(self, p):
+  def op_3swap(self):
     '''Swap the topmost and third-topmost elements of the stack.'''
     s = self.stack.pop()
     t = self.stack.pop()
@@ -375,24 +383,26 @@ class TwoStackInterpreter(object):
     self.stack.append(t)
     self.stack.append(u)
   
-  def op_add(self, p):
+  def op_add(self):
     '''Pop the two topmost elements and add them, pushing the result.'''
     self.stack.append(self.stack.pop() + self.stack.pop())
   
-  def op_subtract(self, p):
+  def op_subtract(self):
     ''''''
     a = self.stack.pop()
     self.stack.append(self.stack.pop() - a)
   
-  def op_multiply(self, p):
+  def op_multiply(self):
     ''''''
     self.stack.append(self.stack.pop() * self.stack.pop())
   
-  def op_divide(self, p):
+  def op_divide(self):
     ''''''
-    if len(p) > 1 and p[1] == '/': # integer division
+    #TODO: again, find a better way to implement these double character things
+    rest=self.program[self.index:]
+    if len(rest) > 1 and rest[1] == '/': # integer division
       if len(self.stack) > 1:
-        self.op_intdivide(p)
+        self.op_intdivide()
         return 1
       else:
         self.error('not enough items on stack')
@@ -403,17 +413,17 @@ class TwoStackInterpreter(object):
       else:
         self.error('not enough items on stack')
   
-  def op_intdivide(self, p):
+  def op_intdivide(self):
     ''''''
     a = self.stack.pop()
     self.stack.append(self.stack.pop() // a)
 
-  def op_modulo(self, p):
+  def op_modulo(self):
     ''''''
     a = self.stack.pop()
     self.stack.append(self.stack.pop() % a)
   
-  def op_power(self, p):
+  def op_power(self):
     ''''''
     self.stack.append(self.stack.pop() ** self.stack.pop())
   
@@ -488,24 +498,24 @@ class TwoStackInterpreter(object):
 
     self.index = 0
     while (self.index < len(program)):
-      p = program[self.index:]
+      rest = program[self.index:]
       extra_advance = None
 
-      if p[0] in self.commands.keys():
-        cmd = self.commands[p[0]]
+      if rest[0] in self.commands.keys():
+        cmd = self.commands[rest[0]]
         if len(self.stack) >= cmd['min']:
-          extra_advance = self.commands[p[0]]['function'](p)
+          extra_advance = self.commands[rest[0]]['function']()
         else:
           self.error('not enough elements on the stack')
           break
-      elif p[0].isdigit():
+      elif rest[0].isdigit():
         # shim to get integer literals working
-        extra_advance = self.op_intliteral(p)
-      elif p[0].isalpha():
+        extra_advance = self.op_intliteral()
+      elif rest[0].isalpha():
         # shim to get alias recollection without any leading symbols
-        extra_advance = self.op_aliasrecall(p)
+        extra_advance = self.op_aliasrecall()
       else:
-        self.error('unknown symbol \'{}\''.format(p[0]))
+        self.error('unknown symbol \'{}\''.format(rest[0]))
         break
       
       if extra_advance is None:
