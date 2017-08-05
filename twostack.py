@@ -1,4 +1,5 @@
 import sys
+import os
 
 """
 The formal interpreter for TwoStack.
@@ -338,8 +339,11 @@ class TwoStackInterpreter(object):
 
   def op_print(self, p):
     ''''''
-    print(chr(self.stack[-1]), end='')
-    sys.stdout.flush()
+    char = chr(self.stack[-1])
+    sys.stdout.write(char)
+
+    if char in os.linesep:
+      sys.stdout.flush()
 
   def op_discard(self, p):
     '''Pop the topmost item of the stack.'''
