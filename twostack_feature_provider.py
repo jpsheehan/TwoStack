@@ -122,6 +122,11 @@ class TwoStackFeatureProvider(object):
                 'min': 2,
                 'function': self.op_logicalor
             },
+            '^': {
+                'name': 'logical xor',
+                'min': 2,
+                'function': self.op_logicalxor
+            },
 
             # ===== Code Execution ===== #
 
@@ -360,6 +365,14 @@ class TwoStackFeatureProvider(object):
         elem1 = self.stack.pop()
         elem2 = self.stack.pop()
         self.stack.append(int(elem1 or elem2))
+
+    def op_logicalxor(self):
+        '''The logical 'xor' operator.
+        Pops the top two elements and pushes the boolean result.
+        '''
+        elem1 = self.stack.pop()
+        elem2 = self.stack.pop()
+        self.stack.append(int(elem1 ^ elem2))
 
     # ===== Code Execution ===== #
 
