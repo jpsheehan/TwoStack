@@ -55,25 +55,35 @@ class TwoStackInterpreter(TwoStackFeatureProvider):
     def print_aliases(self):
         '''Print the aliases to the terminal.'''
         print('Aliases: ')
-        for a, v in self.store.items():
-            print('  {}: {}'.format(a, v))
+        for alias, value in self.store.items():
+            print('  {}: {}'.format(alias, value))
 
     def error(self, message):
         '''Prints detailed error information to the terminal.'''
-        line = self.program[:self.index].count('\n') + 1
-        column = self.program[:self.index].rfind('\n') - self.index
-        # TODO: fix column calculation
+        newline = '\n'
 
-        source_start = max(0, self.index - 10)
-        source_start = max(self.program.rfind('\n', source_start, self.index) + 1, source_start)
+        # specifies the number amount of context characters to provide
+        padding = 40
 
-        source_end = min(len(self.program) - 1, self.index + 10)
-        source_end = min(source_end, self.program.find('\n', self.index, source_end))
+        source_start = max(0, self.index - padding)
 
-        source_offset = self.index - source_start
+        start_newline = self.program.rfind(newline, source_start, self.index)
+
+        if start_newline > -1:
+            source_start = max(start_newline + 1, source_start)
+
+        source_end = min(len(self.program), self.index + padding)
+
+        end_newline = self.program.find(newline, self.index, source_end)
+
+        if end_newline > -1:
+            source_end = min(source_end, end_newline)
+
+        line = self.program[:self.index].count(newline) + 1
+        column = self.index - source_start + 1
 
         print(self.program[source_start:source_end])
-        print((' ' * source_offset) + '^')
+        print((' ' * (column - 1)) + '^')
 
         print('error: {} on line {}, column {}'.format(message, line, column))
 
