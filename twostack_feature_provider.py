@@ -186,11 +186,6 @@ class TwoStackFeatureProvider(object):
                 'min': 0,
                 'function': self.op_whitespace
             },
-            '#': {
-                'name': 'comment',
-                'min': 0,
-                'function': self.op_comment
-            },
             '^[a-zA-Z]+': {
                 'name': 'alias recall',
                 'min': 0,
@@ -549,16 +544,6 @@ class TwoStackFeatureProvider(object):
         self.stack.append(int_value)
 
         return string_length - 1
-
-    def op_comment(self):
-        '''Comments out the remainder of the line'''
-        rest = self.program[self.index:]
-
-        comment_length = 1
-        while comment_length < len(rest) and rest[comment_length] != os.linesep:
-            comment_length += 1
-
-        return comment_length
 
     def op_newline(self):
         '''A stub for newline handling.'''
