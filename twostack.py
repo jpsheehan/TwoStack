@@ -360,19 +360,10 @@ class TwoStackInterpreter(object):
   
   def op_swap(self):
     '''Swap the topmost two elements of the stack.'''
-    rest = self.program[self.index:]
-    #TODO: find a better way to implement double symbol operations
-    if len(rest) > 1 and rest[1] == '\\':
-      if len(self.stack) > 2:
-        self.op_3swap()
-        return 1
-      else:
-        self.error('not enough items on stack')
-    else:
-      s = self.stack.pop()
-      t = self.stack.pop()
-      self.stack.append(s)
-      self.stack.append(t)
+    s = self.stack.pop()
+    t = self.stack.pop()
+    self.stack.append(s)
+    self.stack.append(t)
   
   def op_3swap(self):
     '''Swap the topmost and third-topmost elements of the stack.'''
@@ -382,6 +373,7 @@ class TwoStackInterpreter(object):
     self.stack.append(s)
     self.stack.append(t)
     self.stack.append(u)
+    return 1
   
   def op_add(self):
     '''Pop the two topmost elements and add them, pushing the result.'''
@@ -398,25 +390,14 @@ class TwoStackInterpreter(object):
   
   def op_divide(self):
     ''''''
-    #TODO: again, find a better way to implement these double character things
-    rest=self.program[self.index:]
-    if len(rest) > 1 and rest[1] == '/': # integer division
-      if len(self.stack) > 1:
-        self.op_intdivide()
-        return 1
-      else:
-        self.error('not enough items on stack')
-    else:
-      if len(self.stack) > 1: # division
-        a = self.stack.pop()
-        self.stack.append(self.stack.pop() / a)
-      else:
-        self.error('not enough items on stack')
+    a = self.stack.pop()
+    self.stack.append(self.stack.pop() / a)
   
   def op_intdivide(self):
     ''''''
     a = self.stack.pop()
     self.stack.append(self.stack.pop() // a)
+    return 1
 
   def op_modulo(self):
     ''''''
@@ -495,25 +476,34 @@ class TwoStackInterpreter(object):
   def execute(self, program):
     self.program = program
     self.loop = {}
-
     self.index = 0
+
     while (self.index < len(program)):
       rest = program[self.index:]
       extra_advance = None
 
-      if rest[0] in self.commands.keys():
+      if rest[:2] in self.commands.keys():
+        cmd = self.commands[rest[:2]]
+      elif rest[0] in self.commands.keys():
         cmd = self.commands[rest[0]]
+      else:
+        cmd = None
+      
+      if cmd is not None:
         if len(self.stack) >= cmd['min']:
-          extra_advance = self.commands[rest[0]]['function']()
+          extra_advance = cmd['function']()
         else:
           self.error('not enough elements on the stack')
           break
+
       elif rest[0].isdigit():
         # shim to get integer literals working
         extra_advance = self.op_intliteral()
+
       elif rest[0].isalpha():
         # shim to get alias recollection without any leading symbols
         extra_advance = self.op_aliasrecall()
+
       else:
         self.error('unknown symbol \'{}\''.format(rest[0]))
         break
