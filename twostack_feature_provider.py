@@ -53,7 +53,7 @@ class TwoStackFeatureProvider(object):
                 'min': 2,
                 'function': self.op_modulo
             },
-            '^': {
+            '**': {
                 'name': 'power',
                 'min': 2,
                 'function': self.op_power
@@ -352,7 +352,7 @@ class TwoStackFeatureProvider(object):
         elem1 = self.stack.pop()
         elem2 = self.stack.pop()
         self.stack.append(int(elem1 and elem2))
-    
+
     def op_logicalor(self):
         '''The logical 'or' operator.
         Pops the top two elements and pushes the boolean result.
