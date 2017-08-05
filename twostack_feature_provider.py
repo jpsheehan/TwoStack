@@ -2,8 +2,17 @@ import sys
 import os
 
 class TwoStackFeatureProvider(object):
-    ''''''
+    '''Implements the core language functionailty.'''
+
     def __init__(self):
+        self.program = ''
+        self.loop = {}
+        self.index = 0
+        self.stack = []
+        self.ztack = []
+        self.store = {}
+        self.callstack = []
+
         self.commands = {
             '?': {
                 'name': 'cond jump',
@@ -125,11 +134,6 @@ class TwoStackFeatureProvider(object):
                 'min': 0,
                 'function': self.op_comment
             },
-            '_': {
-                'name': 'debug',
-                'min': 0,
-                'function': self.op_debug
-            },
             '@': {
                 'name': 'exec block',
                 'min': 0,
@@ -166,55 +170,89 @@ class TwoStackFeatureProvider(object):
                 'function': self.op_logicaland
             }
         }
-    
+
+    def error(self, message):
+        '''Raises an interpreter error.'''
+        raise NotImplementedError('TwoStackFeatureProvider.error is not implemented')
+
     def op_logicaland(self):
-        ''''''
-        a = self.stack.pop()
-        b = self.stack.pop()
-        self.stack.append(int(a and b))
-    
+        '''The logical 'and' operator.
+        Pops the top two elements and pushes the boolean result.
+        '''
+        elem1 = self.stack.pop()
+        elem2 = self.stack.pop()
+        self.stack.append(int(elem1 and elem2))
+
     def op_condjump(self):
-        ''''''
+        '''The conditional jump operator.
+        If the top element of the stack is not 0, pop the next element and use that as the index.
+        '''
         if self.stack.pop():
             self.op_execblock()
 
     def op_readchar(self):
-        '''Reads a character from stdin or -1 if empty.'''
+        '''Read a character from stdin.
+        Pushes the ordinal value of the next character in the stream or -1 if the stream is empty.
+        '''
         try:
             char = sys.stdin.read(1)
-        except:
+
+        except KeyboardInterrupt:
             char = ''
-        
-        if len(char) > 0:
+
+        if char:
             self.stack.append(ord(char))
         else:
             self.stack.append(-1)
 
     def op_condgreaterthan(self):
-        ''''''
-        a = self.stack.pop()
-        self.stack.append(int(self.stack.pop() > a))
-    
+        '''The greater than operator.
+        Pop the top two elements and check whether the second element is greater than the first.
+        Push the boolean integer result.
+        '''
+        elem1 = self.stack.pop()
+        elem2 = self.stack.pop()
+        self.stack.append(int(elem2 > elem1))
+
     def op_condlessthan(self):
-        ''''''
-        a = self.stack.pop()
-        self.stack.append(int(self.stack.pop() < a))
+        '''The less than condition.
+        Pop the top two elements and check whether the second element is less than the first.
+        Push the boolean integer result.
+        '''
+        elem1 = self.stack.pop()
+        elem2 = self.stack.pop()
+        self.stack.append(int(elem2 < elem1))
 
     def op_condequal(self):
-        ''''''
-        self.stack.append(int(self.stack.pop() == self.stack.pop()))
-    
+        '''The equal condition.
+        Pop the top two elements and check whether the first element is equal to the first.
+        Push the boolean integer result.
+        '''
+        elem1 = self.stack.pop()
+        elem2 = self.stack.pop()
+        self.stack.append(int(elem1 == elem2))
+
     def op_not(self):
-        ''''''
-        self.stack.append(int(not self.stack.pop()))
-    
+        '''The unary not operator.
+        Pop the top element and push the boolean not as an integer.
+        '''
+        elem = self.stack.pop()
+        self.stack.append(int(not elem))
+
     def op_execblock(self):
-        ''''''
+        '''Jump to an arbitrary location.
+        Store the current location on the callstack.
+        Pop the top element from the stack and use that as the index.
+        '''
         self.callstack.append(self.index)
         self.index = self.stack.pop()
-    
+
     def op_blockbegin(self):
-        ''''''
+        '''Signal the beginning of a code block.
+        Push the index to the stack.
+        Advance the index to the end of the block.
+        '''
+        # find the index of the matching }
         rest = self.program[self.index:]
         depth = 1
         offset = 1
@@ -228,176 +266,263 @@ class TwoStackFeatureProvider(object):
         self.stack.append(self.index)
 
         return offset - 1
-    
-    def op_blockend(self):
-        ''''''
-        self.index = self.callstack.pop()
-    
-    def op_aliasrecall(self):
-        ''''''
-        d = 0
-        rest = self.program[self.index:]
-        while d < len(rest) and rest[d].isalpha():
-            d += 1
-        if d == 0:
-            self.error('alias cannot be empty')
-            return d
-        alias = rest[0:d]
 
+    def op_blockend(self):
+        '''Signals the end of a code block.
+        Return to where the index was before the block was run.
+        '''
+        self.index = self.callstack.pop()
+
+    def op_aliasrecall(self):
+        '''Attempt to recall an alias.
+        Push the alias value to the stack.
+        If the alias does not exist, throw an error.
+        '''
+        rest = self.program[self.index:]
+
+        # find the full alias name
+        last_char_index = 0
+        while last_char_index < len(rest) and rest[last_char_index].isalpha():
+            last_char_index += 1
+
+        if last_char_index == 0:
+            self.error('alias cannot be empty')
+            return last_char_index
+
+        alias = rest[0:last_char_index]
+
+        # recall the alias name if possible
         if alias in self.store.keys():
             self.stack.append(self.store[alias])
         else:
             self.error('alias does not exist')
 
-        return d - 1
+        return last_char_index - 1
 
     def op_aliasdef(self):
-        ''''''
-        d = 1
+        '''Alias definition operator.
+        An alias represents an integer that can be recalled later.
+        Pops the top element of the stack and assigns it to the alias.
+        '''
         rest = self.program[self.index:]
-        while d < len(rest) and rest[d].isalpha():
-            d += 1
-        if d == 1:
+
+        last_char_index = 1
+        while last_char_index < len(rest) and rest[last_char_index].isalpha():
+            last_char_index += 1
+
+        if last_char_index == 1:
             self.error('alias definition cannot be empty')
-            return d
-        alias = rest[1:d]
+            return last_char_index
+
+        alias = rest[1:last_char_index]
         value = self.stack.pop()
+
         self.store[alias] = value
-        return d - 1
+
+        return last_char_index - 1
 
     def op_stringliteral(self):
-        ''''''
-        d = 1
+        '''Pushes a string to the stack character by character.
+        If the string "hello" is pushed to the stack,
+        the top element of the stack will be the integer representation of "o".
+        '''
         rest = self.program[self.index:]
-        while d < len(rest) and rest[d] != '"':
-            self.stack.append(ord(rest[d]))
-            d += 1
-        return d
-    
+
+        string_length = 1
+        while string_length < len(rest) and rest[string_length] != '"':
+            char_value = ord(rest[string_length])
+            self.stack.append(char_value)
+
+            string_length += 1
+
+        return string_length
+
     def op_intliteral(self):
-        ''''''
-        d = 1
+        '''Pushes an integer literal to the stack.'''
         rest = self.program[self.index:]
-        while d < len(rest) and rest[d].isdigit():
-            d += 1
-        self.stack.append(int(rest[:d]))
-        return d - 1
-    
+
+        string_length = 1
+        while string_length < len(rest) and rest[string_length].isdigit():
+            string_length += 1
+
+        int_value = int(rest[:string_length])
+        self.stack.append(int_value)
+
+        return string_length - 1
+
     def op_comment(self):
-        d = 1
+        '''Comments out the remainder of the line'''
         rest = self.program[self.index:]
-        while d < len(rest) and rest[d] != '\n':
-            d += 1
-        return d
+
+        comment_length = 1
+        while comment_length < len(rest) and rest[comment_length] != os.linesep:
+            comment_length += 1
+
+        return comment_length
 
     def op_newline(self):
-        ''''''
+        '''A stub for newline handling.'''
         pass
 
     def op_whitespace(self):
-        ''''''
+        '''A stub for space handling.'''
         pass
-    
+
     def op_loopbegin(self):
-        ''''''
+        '''Signals the beginning of a loop.
+        Checks if the loop is cached in self.loop, if not, find the matching ] and cache it.
+        Peek the stack and checks if the value is equal to 0, if so,
+        jump to the matching ], otherwise continue the loop.
+        '''
+
+        # check if the loop does not exist in the cache
         if self.index not in self.loop.keys():
+            rest = self.program[self.index:]
+
             depth = 1
             offset = 1
-            rest = self.program[self.index:]
             while offset < len(rest) and depth > 0:
+
                 if rest[offset] == ']':
                     depth -= 1
+
                 elif rest[offset] == '[':
                     depth += 1
+
                 else:
                     offset += 1
 
+            # set cache entries for the start and end of the loop
             self.loop[self.index] = self.index + offset
             self.loop[offset + self.index] = self.index
 
-        if len(self.stack) == 0 or self.stack[-1] == 0:
+        # check the loop condition
+        if self.stack and self.stack[-1] == 0:
             self.index = self.loop[self.index]
-    
+
     def op_loopend(self):
-        ''''''
+        '''Signals the end of the loop.
+        Jump to the matching [ stored in the cache.
+        '''
         self.index = self.loop[self.index] - 1
 
-    def op_debug(self):
-        ''''''
-        self.debug()
-    
     def op_stackswap(self):
-        ''''''
-        t = self.stack
+        '''The stackswap operator.
+        Swap the main stacks so that stack now references ztack and ztack now references stack.
+        '''
+        temp_stack = self.stack
         self.stack = self.ztack
-        self.ztack = t
+        self.ztack = temp_stack
 
     def op_crosspop(self):
-        ''''''
-        self.ztack.append(self.stack.pop())
+        '''The crosspop operator.
+        Pop the top element from the stack and push it to the ztack.
+        '''
+        elem = self.stack.pop()
+        self.ztack.append(elem)
 
     def op_print(self):
-        ''''''
+        '''The output operator.
+        Prints the top element of the stack as an ascii character.
+        This is peeked, not popped.
+        '''
         char = chr(self.stack[-1])
         sys.stdout.write(char)
+        #TODO: add try catch for printing invalid ascii
 
+        # flush if char is a newline character
         if char in os.linesep:
             sys.stdout.flush()
 
     def op_discard(self):
-        '''Pop the topmost item of the stack.'''
+        '''The discard operator.
+        Pop the top element from the stack.
+        '''
         self.stack.pop()
-    
+
     def op_duplicate(self):
-        '''Push a copy of the topmost item of the stack.'''
+        '''The duplicate operator.
+        Push a copy of the top element of the stack.
+        '''
         self.stack.append(self.stack[-1])
-    
+
     def op_swap(self):
-        '''Swap the topmost two elements of the stack.'''
-        s = self.stack.pop()
-        t = self.stack.pop()
-        self.stack.append(s)
-        self.stack.append(t)
-    
+        '''The swap operator.
+        Swap the top two elements from the stack.
+        '''
+        elem1 = self.stack.pop()
+        elem2 = self.stack.pop()
+        self.stack.append(elem1)
+        self.stack.append(elem2)
+
     def op_3swap(self):
-        '''Swap the topmost and third-topmost elements of the stack.'''
-        s = self.stack.pop()
-        t = self.stack.pop()
-        u = self.stack.pop()
-        self.stack.append(s)
-        self.stack.append(t)
-        self.stack.append(u)
+        '''The 3Swap operator.
+        Swap the topmost and third-topmost elements from the stack.
+        '''
+        elem1 = self.stack.pop()
+        elem2 = self.stack.pop()
+        elem3 = self.stack.pop()
+        self.stack.append(elem1)
+        self.stack.append(elem2)
+        self.stack.append(elem3)
         return 1
-    
+
     def op_add(self):
-        '''Pop the two topmost elements and add them, pushing the result.'''
-        self.stack.append(self.stack.pop() + self.stack.pop())
-    
+        '''The add operator.
+        Pop the two topmost elements and add them.
+        Pushing the result.
+        '''
+        elem1 = self.stack.pop()
+        elem2 = self.stack.pop()
+        self.stack.append(elem1 + elem2)
+
     def op_subtract(self):
-        ''''''
-        a = self.stack.pop()
-        self.stack.append(self.stack.pop() - a)
-    
+        '''The subtract operator.
+        Pop two elements and subtract the first from the second.
+        Push the result.
+        '''
+        elem1 = self.stack.pop()
+        elem2 = self.stack.pop()
+        self.stack.append(elem2 - elem1)
+
     def op_multiply(self):
-        ''''''
-        self.stack.append(self.stack.pop() * self.stack.pop())
-    
+        '''The multiply operator.
+        Pop two elements and multiply them.
+        Push the result.
+        '''
+        elem1 = self.stack.pop()
+        elem2 = self.stack.pop()
+        self.stack.append(elem1 * elem2)
+
     def op_divide(self):
-        ''''''
+        '''TODO: remove this'''
         a = self.stack.pop()
         self.stack.append(self.stack.pop() / a)
-    
+
     def op_intdivide(self):
-        ''''''
-        a = self.stack.pop()
-        self.stack.append(self.stack.pop() // a)
+        '''The division operator.
+        Pops two elements and divides the second by the first.
+        Pushes the quotient.
+        '''
+        elem1 = self.stack.pop()
+        elem2 = self.stack.pop()
+        self.stack.append(elem2 // elem1)
         return 1
 
     def op_modulo(self):
-        ''''''
-        a = self.stack.pop()
-        self.stack.append(self.stack.pop() % a)
-    
+        '''The modulus operator.
+        Pops two elements and divides the second by the first.
+        Pushes the remainder.
+        '''
+        elem1 = self.stack.pop()
+        elem2 = self.stack.pop()
+        self.stack.append(elem2 % elem1)
+
     def op_power(self):
-        ''''''
-        self.stack.append(self.stack.pop() ** self.stack.pop())  
+        '''The power operator.
+        Pops two elements and the second to the first power.
+        Pushes the result.
+        '''
+        elem1 = self.stack.pop()
+        elem2 = self.stack.pop()
+        self.stack.append(elem2 ** elem1)

@@ -116,6 +116,9 @@ class TwoStackInterpreter(TwoStackFeatureProvider):
                 # shim to get alias recollection without any leading symbols
                 extra_advance = self.op_aliasrecall()
 
+            elif rest[0] == '_':
+                self.debug()
+
             else:
                 self.error('unknown symbol \'{}\''.format(rest[0]))
                 break
