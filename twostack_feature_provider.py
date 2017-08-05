@@ -423,7 +423,7 @@ class TwoStackFeatureProvider(object):
             self.loop[offset + self.index] = self.index
 
         # check the loop condition
-        if self.stack and self.stack[-1] == 0:
+        if not self.stack or (self.stack and self.stack[-1] == 0):
             self.index = self.loop[self.index]
 
     def op_loopend(self):
