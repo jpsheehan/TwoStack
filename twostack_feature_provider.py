@@ -166,7 +166,7 @@ class TwoStackFeatureProvider(object):
             },
 
             # ===== Miscellaneous ===== #
-            '|': {
+            '~': {
                 'name': 'alias def',
                 'min': 1,
                 'function': self.op_aliasdef

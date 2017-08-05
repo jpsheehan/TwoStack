@@ -1,4 +1,4 @@
-{[`]$[.;];$}|p 0[The print function];
+{[`]$[.;];$}~p 0[The print function];
 $1 1 0[Start at 1];
 [
   ;$

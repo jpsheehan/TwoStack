@@ -7,7 +7,7 @@
     `
     10/
   ]$
-}|asciidec
+}~asciidec
 
 12345678
 asciidec@
