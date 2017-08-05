@@ -13,10 +13,9 @@ A simple stack based language inspired by [GolfScript](http://www.golfscript.com
 * Addition: +
 * Subtraction: -
 * Multiplication: *
-* Division: /
-* Integer Division: //
+* Integer Division: /
 * Modulo: %
-* Power: ^
+* Power: **
 
 ### Conditional Operators:
 
@@ -24,6 +23,9 @@ A simple stack based language inspired by [GolfScript](http://www.golfscript.com
 * Less than: <
 * Greater than: >
 * Unary not: !
+* Logical and: &
+* Logical or: |
+* Logical xor: ^
 
 ### Literals:
 
@@ -42,8 +44,8 @@ A simple stack based language inspired by [GolfScript](http://www.golfscript.com
 
 ### Other Features:
 
-* Comment: begin with # and end at the next newline
-* Define an alias: |
+* Comment: begin with 0[ and end with ];
+* Define an alias: ~
 * Recall an alias by typing the alias symbol
 * Unconditional jump: @
 * Conditional jump: ?
@@ -55,21 +57,34 @@ A simple stack based language inspired by [GolfScript](http://www.golfscript.com
 #### Hello, World!
 This example displays the string "Hello, World!" and quits.
 ```
-"Hello, World!"[`]$[.;]
+"Hello, World!"[`]$[.;]$
 ```
 
 #### If Else Statement
 This example displays the string "true" if the condition is true and "false" if the condition is false.
 ```
-# define a print function
-{[`]$[.;]}|print
+{[`]$[.;]$}~print
+{
+  "false"print@
+}
+{;
+  "true"
+  print@
+{}0}
 
-# execute a particular block depending on the condition (10 == 10).
-{"false"print@}{;"true"print@{}0}10 10=?;@
+10 10 =
+
+?;@
 ```
 
 #### FizzBuzz Program
 The infamous fizzbuzz test:
 ```
-{[`]$[.;];$}|p{$0$[:10%48+`10//]$[`];$}|a$1 1[;${{{$:`$a@$0$p@10.}{;0$0$"Buzz"p@10.{}0}$:`$5%0=?;@}{;0$0$"Fizz"10p@{}0}$:`$3%0=?;@}{;0$0$"Fizzbuzz"10p@{}0}$:`$:3%0=\5%0=&?;@$1+:100<]
+{[`]$[.;];$}~p$1 1[;${{{$:`0$[:10%48+`10/]$[`];0$p@10.}{;0$0$"Buzz"10p@{}0}$:`$5%0=?;@}{;0$0$"Fizz"10p@{}0}$:`$3%0=?;@}{;0$0$"Fizzbuzz"10p@{}0}$:`$:3%0=\5%0=&?;@$1+:100<]
+```
+
+#### Cat Program
+Simply prints what it reads from the standard input. This works cleanly with pipes.
+```
+,:[;.;,:0 1-=!];;
 ```
