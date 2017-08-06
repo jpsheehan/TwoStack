@@ -10,8 +10,7 @@ class TwoStackSourceCollection(object):
     def __init__(self):
         self.sources = []
         self.source_index = None
-
-        self.__attrs = {}
+        self.source_callstack = []
 
     def error(self, message):
         '''Raises an interpreter error.'''
@@ -22,25 +21,31 @@ class TwoStackSourceCollection(object):
         self.sources.append(source)
 
         if self.source_index is None:
-            self.switch_source(-1)
+            self.switch_source(len(self.sources) - 1)
+
+        return len(self.sources) - 1
 
     def switch_source(self, new_index):
         '''Switches to a new source by index.'''
+
+        self.source_callstack.append(self.source_index)
         self.source_index = new_index
 
-        if self.__attrs is not None:
-            self.sources[self.source_index].attrs = self.__attrs
-            self.__attrs = None
+    def return_source(self):
+        '''Switches back to the previous source context.'''
+        self.source_index = self.source_callstack.pop()
 
     def load_file(self, filename):
         '''Loads a new source and adds it to the list.'''
+        index = None
 
         try:
             file = open(filename, 'r')
 
-            src = TwoStackSource()
-            src.load(filename, file.read())
-            self.add_source(src)
+            src = TwoStackSource(filename, file.read())
+            index = self.add_source(src)
+
+            file.close()
 
         except FileNotFoundError:
             self.error('the file "{}" could not be found'.format(filename))
@@ -48,14 +53,13 @@ class TwoStackSourceCollection(object):
         except IOError:
             self.error('the file "{}" could not be read'.format(filename))
 
-        finally:
-            file.close()
+        return index
 
     ##### Properties #####
 
     @property
     def index(self):
-        '''Contains the index of the currently executing script.'''
+        '''Contains the program index of the currently executing script.'''
         return self.sources[self.source_index].index
 
     @index.setter
@@ -75,14 +79,8 @@ class TwoStackSourceCollection(object):
     @property
     def attrs(self):
         '''Contains misc attributes.'''
-        if not self.source_index:
-            return self.__attrs
-        else:
-            return self.sources[self.source_index].attrs
+        return self.sources[self.source_index].attrs
 
     @attrs.setter
     def attrs(self, attrs):
-        if not self.source_index:
-            self.__attrs = attrs
-        else:
-            self.sources[self.source_index].attrs = attrs
+        self.sources[self.source_index].attrs = attrs

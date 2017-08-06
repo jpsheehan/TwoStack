@@ -89,7 +89,7 @@ class TwoStackInterpreter(TwoStackFeatureProvider):
     def execute(self):
         '''Execute self.'''
         try:
-            while self.index < len(self.program):
+            while self.sources:
                 rest = self.program[self.index:]
                 extra_advance = None
                 cmd = None
@@ -129,6 +129,9 @@ class TwoStackInterpreter(TwoStackFeatureProvider):
                     extra_advance = 0
 
                 self.index += 1 + extra_advance
+                
+                if self.index >= len(self.program):
+                    self.return_source()
 
         except SystemExit:
             pass

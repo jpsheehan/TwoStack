@@ -17,8 +17,6 @@ class TwoStackFeatureProvider(TwoStackSourceCollection):
         self.stack = []
         self.ztack = []
 
-        self.attrs = {'loops': {}, 'aliases': {}, 'callstack': []}
-
         # the command manifest contains some basic data about each operator
         # such as the minimum number of elements on the stack, etc
         self.commands = {
@@ -203,6 +201,11 @@ class TwoStackFeatureProvider(TwoStackSourceCollection):
                 'min': 0,
                 'function': self.op_intliteral,
                 'is_regex': True
+            },
+            '#': {
+                'name': 'source include',
+                'min': 0,
+                'function': self.op_source_include
             }
         }
 
@@ -575,4 +578,19 @@ class TwoStackFeatureProvider(TwoStackSourceCollection):
     def op_whitespace(self):
         '''A stub for space handling.'''
         pass
-    
+
+    def op_source_include(self):
+        '''Includes a source file and executes it here before handling control back.'''
+        rest = self.program[self.index:]
+
+        string_length = 1
+        while string_length < len(rest) and rest[string_length] != '#':
+            string_length += 1
+
+        filename = rest[1:string_length]
+
+        self.index += string_length + 1
+        i = self.load_file(filename)
+        self.switch_source(i)
+
+        return -1
