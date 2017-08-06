@@ -12,16 +12,6 @@ from twostack_feature_provider import TwoStackFeatureProvider
 class TwoStackInterpreter(TwoStackFeatureProvider):
     '''The formal interpreter for TwoStack.'''
 
-    def reset(self):
-        '''Resets the interpreter state.'''
-        self.program = ''
-        self.loop = {}
-        self.index = 0
-        self.stack = []
-        self.ztack = []
-        self.store = {}
-        self.callstack = []
-
     def debug(self):
         '''Presents the debug menu to the user.'''
         prompt = 'Debug: ((c)ontinue, (s)tack, (z)tack, (a)liases, (q)uit) > '
@@ -89,56 +79,55 @@ class TwoStackInterpreter(TwoStackFeatureProvider):
 
     def execute_file(self, filename):
         '''Executes a file through the interpreter.'''
+        self.load_file(filename)
+        self.execute()
+
+    def execute(self):
+        '''Execute self.'''
         try:
-            with open(filename) as file:
-                program = file.read()
-                self.execute(program)
-        except SystemExit:
-            pass
-        except:
-            print('An unexpected error occurred')
+            while self.index < len(self.program):
+                rest = self.program[self.index:]
+                extra_advance = None
+                cmd = None
 
-    def execute(self, program):
-        '''Execute a string.'''
-        self.program = program
+                # check for 2 character operators
+                if rest[:2] in self.commands.keys():
+                    cmd = self.commands[rest[:2]]
 
-        while self.index < len(program):
-            rest = program[self.index:]
-            extra_advance = None
-            cmd = None
+                # check for 1 character operators
+                elif rest[0] in self.commands.keys():
+                    cmd = self.commands[rest[0]]
 
-            # check for 2 character operators
-            if rest[:2] in self.commands.keys():
-                cmd = self.commands[rest[:2]]
-
-            # check for 1 character operators
-            elif rest[0] in self.commands.keys():
-                cmd = self.commands[rest[0]]
-
-            # check for regular expressions
-            else:
-                for key in self.commands:
-                    this_cmd = self.commands[key]
-                    if this_cmd.get('is_regex', False):
-                        if re.match(key, rest):
-                            cmd = this_cmd
-                            break
-
-            if cmd is not None:
-                if len(self.stack) >= cmd['min']:
-                    extra_advance = cmd['function']()
+                # check for regular expressions
                 else:
-                    self.error('not enough elements on the stack')
+                    for key in self.commands:
+                        this_cmd = self.commands[key]
+                        if this_cmd.get('is_regex', False):
+                            if re.match(key, rest):
+                                cmd = this_cmd
+                                break
+
+                if cmd is not None:
+                    if len(self.stack) >= cmd['min']:
+                        extra_advance = cmd['function']()
+                    else:
+                        self.error('not enough elements on the stack')
+                        break
+
+                elif rest[0] == '_':
+                    self.debug()
+
+                else:
+                    self.error('unknown symbol \'{}\''.format(rest[0]))
                     break
 
-            elif rest[0] == '_':
-                self.debug()
+                if extra_advance is None:
+                    extra_advance = 0
 
-            else:
-                self.error('unknown symbol \'{}\''.format(rest[0]))
-                break
+                self.index += 1 + extra_advance
 
-            if extra_advance is None:
-                extra_advance = 0
+        except SystemExit:
+            pass
 
-            self.index += 1 + extra_advance
+        except:
+            print('An unexpected error occurred')

@@ -7,17 +7,13 @@ Contains the TwoStackFeatureProvider which defines most of the operators in the 
 import sys
 import os
 
-class TwoStackFeatureProvider(object):
+from twostack_source import TwoStackSource
+
+class TwoStackFeatureProvider(TwoStackSource):
     '''Implements the core language functionailty.'''
 
-    def error(self, message):
-        '''Raises an interpreter error.'''
-        raise NotImplementedError('TwoStackFeatureProvider.error is not implemented')
-
     def __init__(self):
-        self.program = ''
-        self.loop = {}
-        self.index = 0
+        super().__init__()
         self.stack = []
         self.ztack = []
         self.store = {}
