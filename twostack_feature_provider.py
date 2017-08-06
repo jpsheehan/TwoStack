@@ -7,17 +7,17 @@ Contains the TwoStackFeatureProvider which defines most of the operators in the 
 import sys
 import os
 
-from twostack_source import TwoStackSource
+from twostack_source_collection import TwoStackSourceCollection
 
-class TwoStackFeatureProvider(TwoStackSource):
+class TwoStackFeatureProvider(TwoStackSourceCollection):
     '''Implements the core language functionailty.'''
 
     def __init__(self):
         super().__init__()
         self.stack = []
         self.ztack = []
-        self.store = {}
-        self.callstack = []
+
+        self.attrs = {'loops': {}, 'aliases': {}, 'callstack': []}
 
         # the command manifest contains some basic data about each operator
         # such as the minimum number of elements on the stack, etc
@@ -384,7 +384,7 @@ class TwoStackFeatureProvider(TwoStackSource):
         Store the current location on the callstack.
         Pop the top element from the stack and use that as the index.
         '''
-        self.callstack.append(self.index)
+        self.attrs['callstack'].append(self.index)
         self.index = self.stack.pop()
 
     # ===== Blocks ===== #
@@ -413,7 +413,7 @@ class TwoStackFeatureProvider(TwoStackSource):
         '''Signals the end of a code block.
         Return to where the index was before the block was run.
         '''
-        self.index = self.callstack.pop()
+        self.index = self.attrs['callstack'].pop()
 
     def op_loopbegin(self):
         '''Signals the beginning of a loop.
@@ -423,7 +423,7 @@ class TwoStackFeatureProvider(TwoStackSource):
         '''
 
         # check if the loop does not exist in the cache
-        if self.index not in self.loop.keys():
+        if self.index not in self.attrs['loops'].keys():
             rest = self.program[self.index:]
 
             depth = 1
@@ -441,18 +441,18 @@ class TwoStackFeatureProvider(TwoStackSource):
             offset -= 1
 
             # set cache entries for the start and end of the loop
-            self.loop[self.index] = self.index + offset
-            self.loop[offset + self.index] = self.index
+            self.attrs['loops'][self.index] = self.index + offset
+            self.attrs['loops'][offset + self.index] = self.index
 
         # check the loop condition
         if not self.stack or (self.stack and self.stack[-1] == 0):
-            self.index = self.loop[self.index]
+            self.index = self.attrs['loops'][self.index]
 
     def op_loopend(self):
         '''Signals the end of the loop.
         Jump to the matching [ stored in the cache.
         '''
-        self.index = self.loop[self.index] - 1
+        self.index = self.attrs['loops'][self.index] - 1
 
     # ===== Input/Output ===== #
 
@@ -510,8 +510,8 @@ class TwoStackFeatureProvider(TwoStackSource):
         alias = rest[0:last_char_index]
 
         # recall the alias name if possible
-        if alias in self.store.keys():
-            self.stack.append(self.store[alias])
+        if alias in self.attrs['aliases'].keys():
+            self.stack.append(self.attrs['aliases'][alias])
         else:
             self.error('alias does not exist')
 
@@ -535,7 +535,7 @@ class TwoStackFeatureProvider(TwoStackSource):
         alias = rest[1:last_char_index]
         value = self.stack.pop()
 
-        self.store[alias] = value
+        self.attrs['aliases'][alias] = value
 
         return last_char_index - 1
 

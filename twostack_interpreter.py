@@ -46,7 +46,7 @@ class TwoStackInterpreter(TwoStackFeatureProvider):
     def print_aliases(self):
         '''Print the aliases to the terminal.'''
         print('Aliases: ')
-        for alias, value in self.store.items():
+        for alias, value in self.attrs['aliases'].items():
             print('  {}: {}'.format(alias, value))
 
     def error(self, message):
@@ -79,6 +79,7 @@ class TwoStackInterpreter(TwoStackFeatureProvider):
 
         print('error in {}: {} on line {}, column {}' \
             .format(os.path.basename(self.filename), message, line, column))
+        sys.exit(0)
 
     def execute_file(self, filename):
         '''Executes a file through the interpreter.'''
@@ -134,3 +135,4 @@ class TwoStackInterpreter(TwoStackFeatureProvider):
 
         except:
             print('An unexpected error occurred')
+            raise
