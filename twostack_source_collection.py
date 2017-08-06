@@ -2,9 +2,10 @@
 Author: Jesse Sheehan <jesse@sheehan.nz>
 '''
 
-from twostack_source import TwoStackSource
+from twostack_source import TwoStackExecutionContext
 
-class TwoStackSourceCollection(object):
+#TODO: refactor as ExecutionContextManager
+class TwoStackExecutionContextManager(object):
     '''Represents the interpretation state of multiple files.'''
 
     def __init__(self):
@@ -42,7 +43,7 @@ class TwoStackSourceCollection(object):
         try:
             file = open(filename, 'r')
 
-            src = TwoStackSource(filename, file.read())
+            src = TwoStackExecutionContext(filename, file.read())
             index = self.add_source(src)
 
             file.close()

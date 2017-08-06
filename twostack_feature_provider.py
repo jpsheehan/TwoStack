@@ -7,9 +7,9 @@ Contains the TwoStackFeatureProvider which defines most of the operators in the 
 import sys
 import os
 
-from twostack_source_collection import TwoStackSourceCollection
+from twostack_source_collection import TwoStackExecutionContextManager
 
-class TwoStackFeatureProvider(TwoStackSourceCollection):
+class TwoStackFeatureProvider(TwoStackExecutionContextManager):
     '''Implements the core language functionailty.'''
 
     def __init__(self):
