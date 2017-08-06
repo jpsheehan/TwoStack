@@ -89,7 +89,7 @@ class TwoStackInterpreter(TwoStackFeatureProvider):
     def execute(self):
         '''Execute self.'''
         try:
-            while self.sources:
+            while self.source_index is not None:
                 rest = self.program[self.index:]
                 extra_advance = None
                 cmd = None

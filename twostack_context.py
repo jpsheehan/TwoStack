@@ -2,7 +2,7 @@
 Author: Jesse Sheehan <jesse@sheehan.nz>
 '''
 
-class TwoStackExecutionContext(object):
+class TwoStackContext(object):
     '''Represents the current state of execution.'''
 
     def __init__(self, filename, program):
