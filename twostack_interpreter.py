@@ -93,9 +93,10 @@ class TwoStackInterpreter(TwoStackFeatureProvider):
             with open(filename) as file:
                 program = file.read()
                 self.execute(program)
+        except SystemExit:
+            pass
         except:
             print('An unexpected error occurred')
-            raise
 
     def execute(self, program):
         '''Execute a string.'''
