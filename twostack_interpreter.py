@@ -129,7 +129,8 @@ class TwoStackInterpreter(TwoStackFeatureProvider):
                     extra_advance = 0
 
                 self.index += 1 + extra_advance
-                
+
+                # if we have reached the end of the file, pass execution back to the calling file (if any)
                 if self.index >= len(self.program):
                     self.return_source()
 

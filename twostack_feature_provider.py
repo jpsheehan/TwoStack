@@ -593,4 +593,5 @@ class TwoStackFeatureProvider(TwoStackSourceCollection):
         i = self.load_file(filename)
         self.switch_source(i)
 
+        # return -1 so that indexing of the included file begins at 0
         return -1

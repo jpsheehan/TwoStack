@@ -60,27 +60,32 @@ class TwoStackSourceCollection(object):
     @property
     def index(self):
         '''Contains the program index of the currently executing script.'''
-        return self.sources[self.source_index].index
+        return self.source.index
 
     @index.setter
     def index(self, index):
-        self.sources[self.source_index].index = index
+        self.source.index = index
 
     @property
     def program(self):
         '''Contains the currently executing program.'''
-        return self.sources[self.source_index].program
+        return self.source.program
 
     @property
     def filename(self):
         '''Contains the filename of the currently executing program.'''
-        return self.sources[self.source_index].filename
+        return self.source.filename
 
     @property
     def attrs(self):
         '''Contains misc attributes.'''
-        return self.sources[self.source_index].attrs
+        return self.source.attrs
 
     @attrs.setter
     def attrs(self, attrs):
-        self.sources[self.source_index].attrs = attrs
+        self.source.attrs = attrs
+
+    @property
+    def source(self):
+        '''Contains the current execution context.'''
+        return self.sources[self.source_index]
