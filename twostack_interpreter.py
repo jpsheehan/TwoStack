@@ -6,6 +6,7 @@ TODO: Show command line arguments, etc...
 
 import sys
 import re
+import os
 
 from twostack_feature_provider import TwoStackFeatureProvider
 
@@ -72,10 +73,12 @@ class TwoStackInterpreter(TwoStackFeatureProvider):
         line = self.program[:self.index].count(newline) + 1
         column = self.index - source_start + 1
 
+        print()
         print(self.program[source_start:source_end])
         print((' ' * (column - 1)) + '^')
 
-        print('error: {} on line {}, column {}'.format(message, line, column))
+        print('error in {}: {} on line {}, column {}' \
+            .format(os.path.basename(self.filename), message, line, column))
 
     def execute_file(self, filename):
         '''Executes a file through the interpreter.'''
